@@ -3,7 +3,7 @@
 
 Stepper::Stepper(int stepsPerRevolution, int step_pin, int dir_pin)
 {
-    this->last_step_time = 0;
+    this->last_step_time = 3994967295L;
     this->number_of_steps = stepsPerRevolution;
     this->step_pin = step_pin;
     this->dir_pin = dir_pin;
@@ -61,7 +61,10 @@ void Stepper::setMove(int steps_to_move, long whatSpeed, bool finish)
 }
 int Stepper::step()
 {
-    if (this->move_continue && this->step_delay != 0 && (this->step_delay + this->last_step_time) < micros())
+    if (
+        this->move_continue && // is in move
+        this->step_delay != 0 && // speed is defined
+        (micros() - this->last_step_time) < this->step_delay) // time to make a step has come
     {
         // Serial.println("step");
         stepMotor();
@@ -75,7 +78,7 @@ int Stepper::stepDelay()
     if (this->steps_left < 1 && !this->move_continue)
         return 0;
     unsigned long now = micros();
-    while (now - this->last_step_time < this->step_delay)
+    while ((now - this->last_step_time) < this->step_delay)
     {
         now = micros();
     }

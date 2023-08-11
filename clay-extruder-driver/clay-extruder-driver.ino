@@ -118,105 +118,18 @@ void loop()
       BLEStatus = true;
     }
 
-      // check for characteristic write
-      if (speedCharacteristic.written())
-      {
-        Serial.print("Speed: ");
-        Serial.println(speedCharacteristic.value(), 10);
-        speed = speedCharacteristic.value();
-        pressureTarget = 0;
-        // setMove(int <no of steps> | 0 <infinite> [, int <speed rpm> [, bool <move immediately>])
-        pumpStepper.setMove(0, speed);
-      }
-
-      if (pressureTargetCharacteristic.written())
-      {
-        Serial.print("Pressure Target: ");
-        Serial.println(pressureTargetCharacteristic.value());
-        Serial.print("Using speed: ");
-        Serial.println(speed);
-
-        pressureTarget = pressureTargetCharacteristic.value();
-        // setMove(int <no of steps> | 0 <infinite> [, int <speed rpm> [, bool <move immediately>])
-        if(pressureSensor.connected) {
-          float pressure = pressureSensor.readMA();
-          Serial.print("Pressure ");
-          Serial.println(pressure);
-          pressureCharacteristic.writeValue(pressure);
-
-          pumpStepper.setMove(0, speed);
-          speedCharacteristic.writeValue(speed);
-        }
-        else
-        {
-          if (pressureSensor.begin())
-          {
-            pumpStepper.setMove(0, speed);
-            speedCharacteristic.writeValue(speed);
-          }
-          else
-          {
-            pumpStepper.setMove(0, 0);
-            speed = 0;
-            speedCharacteristic.writeValue(0);
-            pressureTargetCharacteristic.writeValue(0);
-            Serial.println("Pressure sensor not connected!");
-          }
-        }
-      }
-      // while(pumpStepper.step())
-    
-  }
-
-  if (pressureSensor.connected)
-  {
-    if ((pressureSensor.last_read_time + 10.0) < micros())
+    // check for characteristic write
+    if (speedCharacteristic.written())
     {
-      float pressure = pressureSensor.readMA();
-      if (pressure_plot_cycle < 100)
-      {
-        pressure_plot_cycle++;
-      }
-      else
-      {
-        Serial.print("Pressure ");
-        Serial.println(pressure);
-        pressureCharacteristic.writeValue(pressure);
-
-        if (pressure > pressureTarget)
-        {
-          pumpStepper.setMove(0, 0);
-          speedCharacteristic.writeValue(0);
-        }
-        if(pressure < pressureTarget) {
-          if (pressure < (pressureTarget * 0.98) && pressureTarget != 0)
-          {
-            pumpStepper.setMove(0, speed);
-            speedCharacteristic.writeValue(speed);
-          } else {
-            float speedFrac = (pressureTarget - pressure) / pressureTarget / 0.02;
-            Serial.print("SpeedFrac");
-            Serial.println(speedFrac);
-            Serial.println(speed * speedFrac);
-            pumpStepper.setMove(0, speed);
-            speedCharacteristic.writeValue(speed * speedFrac);
-          }
-        }
-        pressure_plot_cycle = 0;
-      }
-
-      // hard stop when pressure hits a limit or is lost somehow
-      if (pressure > 12 || pressure < 3) {
-        pumpStepper.setMove(0, 0);
-        pressureCharacteristic.writeValue(pressure);
-        speedCharacteristic.writeValue(0);
-      }
-    }
-  } else {
-    if (pressureTarget != 0) {
+      Serial.print("Speed: ");
+      Serial.println(speedCharacteristic.value(), 10);
+      speed = speedCharacteristic.value();
       pressureTarget = 0;
-      pumpStepper.setMove(0, 0);
+      // setMove(int <no of steps> | 0 <infinite> [, int <speed rpm> [, bool <move immediately>])
+      pumpStepper.setMove(0, speed);
     }
+
+    
   }
 
   // do step if required

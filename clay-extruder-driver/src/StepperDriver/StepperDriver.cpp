@@ -3,7 +3,8 @@
 
 Stepper::Stepper(int stepsPerRevolution, int step_pin, int dir_pin)
 {
-    this->last_step_time = 3994967295L;
+    this->last_step_time = 0;
+    this->blink_time = 0;
     this->number_of_steps = stepsPerRevolution;
     this->step_pin = step_pin;
     this->dir_pin = dir_pin;
@@ -18,6 +19,7 @@ void Stepper::setSpeed(long whatSpeed)
     this->speed = whatSpeed;
     if(this->speed == 0) {
         this->move_continue = false;
+        digitalWrite(LED_BUILTIN, HIGH);
     }
     //Serial.println("setSpeed");
     this->step_delay = 60L * 1000L * 1000L / this->number_of_steps / abs(whatSpeed);
@@ -64,11 +66,14 @@ int Stepper::step()
     if (
         this->move_continue && // is in move
         this->step_delay != 0 && // speed is defined
-        (micros() - this->last_step_time) < this->step_delay) // time to make a step has come
+        ( micros() - this->last_step_time) > this->step_delay
+    ) // time to make a step has come
     {
         // Serial.println("step");
         stepMotor();
         this->last_step_time = this->last_step_time + this->step_delay;
+        Serial.print("Step time: ");
+        Serial.println(this->last_step_time);
         // above would fail to catch up if the motor is behind a more than a step
     }
     return this->last_step_time;
@@ -118,7 +123,20 @@ void Stepper::dirMotor(int dir)
 void Stepper::stepMotor()
 {
     digitalWrite(this->step_pin, HIGH);
+
     delayMicroseconds(50);
+
     digitalWrite(this->step_pin, LOW);
+
     delayMicroseconds(50);
+
+    if(
+        ( micros() - this->blink_time) > this->step_delay * 800
+    ) {
+        digitalWrite(LED_BUILTIN, LOW);
+        if(( micros() - this->blink_time) > this->step_delay * 1000) {
+            digitalWrite(LED_BUILTIN, HIGH);
+            this->blink_time = micros();
+        }
+    }
 }

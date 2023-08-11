@@ -23,6 +23,7 @@ public:
     int step();
     int stepDelay();
     unsigned long last_step_time; // time stamp in us of when the last step was taken
+    unsigned long blink_time; // time stamp in us of when the last step was taken
 
 private:
     void dirMotor(int dir);

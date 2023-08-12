@@ -1,31 +1,26 @@
 
 /*
- Stepper Driver Control
+Clay extruder control
+
+ modified Stepper Driver Control
 
  This program drives a stepper through a driver.
  The driver is attached to digital pins 8 and 9 and 3.3V of the Arduino.
+
+ Stepper is controlled via BLE
  
  Created 28 May. 2020
- Modified 29 May. 2020
+ Modified 12 Aug. 2023
  by Kaiko Kivi
 
  */
 #include <Arduino.h>
 #include <ArduinoBLE.h>
 #include "src/StepperDriver/StepperDriver.h"
-#include "src/PressureReader/PressureReader.h"
-
-// BLE attributes for Pump controller
-// const char *BLE_LOCAL_NAME = "Pump";
-// const char *BLE_DEVICE_NAME = "Pump";
-// const char *BLE_STEPPER_SERVICE_ID = "2f62cdb2-d105-466e-a818-81ea9adfe9ae";
-// const char *BLE_SPEED_CHAR_ID = "f2dd248a-4c5f-48c4-bee7-cc237fd666b4";
-// const char *BLE_PRESSURE_TARGET_CHAR_ID = "b9ec56a5-b66c-4ec6-89e2-7d539d606171";
-// const char *BLE_PRESSURE_SENSOR_CHAR_ID = "2dbee6b6-3bb7-456a-bd83-d830ed191eea";
 
 // BLE attributes for EXTURDER controller
 const char *BLE_LOCAL_NAME = "Extruder";
-const char *BLE_DEVICE_NAME = "Extruder";
+const char *BLE_DEVICE_NAME = BLE_LOCAL_NAME;
 const char *BLE_STEPPER_SERVICE_ID = "19b10000-e8f2-537e-4f6c-d104768a1214";
 const char *BLE_SPEED_CHAR_ID = "19b10001-e8f2-537e-4f6c-d104768a1214";
 const char *BLE_PRESSURE_TARGET_CHAR_ID = "b9ec56a5-b66c-4ec6-89e2-7d539d606171";
@@ -36,19 +31,13 @@ const int stepFrag = 5;
 const int stepsPerRevolution = fullStepRev * stepFrag; // change this to fit the number of steps per revolution
 
 int speed = 0; // initial speed is 0
-float pressureTarget = 5.0; // initial pressure target is 5.0
-int pressure_plot_cycle = 0;
 
 // initialize the stepper library on pins 8, 9:
 Stepper pumpStepper(stepsPerRevolution, 8, 9);
 
-// initialise pressure sensor
-PressureSensor pressureSensor;
 
 BLEService StepperService(BLE_STEPPER_SERVICE_ID); // BLE LED Service
 BLEIntCharacteristic speedCharacteristic(BLE_SPEED_CHAR_ID, BLERead | BLEWrite | BLENotify);
-BLEFloatCharacteristic pressureTargetCharacteristic(BLE_PRESSURE_TARGET_CHAR_ID, BLERead | BLEWrite | BLENotify);
-BLEFloatCharacteristic pressureCharacteristic(BLE_PRESSURE_SENSOR_CHAR_ID, BLERead | BLEWrite | BLENotify);
 
 void setup()
 {
@@ -58,17 +47,6 @@ void setup()
   // while (!Serial);
 
   pinMode(LED_BUILTIN, OUTPUT);
-
-  if(!pressureSensor.begin()) {
-
-    Serial.println("Starting sensor falied");
-    pumpStepper.setMove(0,0);
-  } else {
-    float pressure = pressureSensor.readMA();
-
-    Serial.print("Pressure ");
-    Serial.println(pressure);
-  }
 
   if (!BLE.begin())
   {
@@ -84,8 +62,6 @@ void setup()
 
   // add the characteristic to the service
   StepperService.addCharacteristic(speedCharacteristic);
-  StepperService.addCharacteristic(pressureTargetCharacteristic);
-  StepperService.addCharacteristic(pressureCharacteristic);
 
   // add service
   BLE.addService(StepperService);
@@ -124,8 +100,7 @@ void loop()
       Serial.print("Speed: ");
       Serial.println(speedCharacteristic.value(), 10);
       speed = speedCharacteristic.value();
-      pressureTarget = 0;
-      // setMove(int <no of steps> | 0 <infinite> [, int <speed rpm> [, bool <move immediately>])
+
       pumpStepper.setMove(0, speed);
     }
 

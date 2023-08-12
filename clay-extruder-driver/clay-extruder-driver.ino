@@ -7,7 +7,7 @@ Clay extruder control
  This program drives a stepper through a driver.
  The driver is attached to digital pins 8 and 9 and 3.3V of the Arduino.
 
- Stepper is controlled via BLE
+ Stepper is controlled via BLE and Serial connection
  
  Created 28 May. 2020
  Modified 12 Aug. 2023
@@ -19,7 +19,7 @@ Clay extruder control
 #include "src/StepperDriver/StepperDriver.h"
 
 // BLE attributes for EXTURDER controller
-const char *BLE_LOCAL_NAME = "Extruder";
+const char *BLE_LOCAL_NAME = "Extruder-serial";
 const char *BLE_DEVICE_NAME = BLE_LOCAL_NAME;
 const char *BLE_STEPPER_SERVICE_ID = "19b10000-e8f2-537e-4f6c-d104768a1214";
 const char *BLE_SPEED_CHAR_ID = "19b10001-e8f2-537e-4f6c-d104768a1214";
@@ -102,9 +102,20 @@ void loop()
       speed = speedCharacteristic.value();
 
       pumpStepper.setMove(0, speed);
+    } 
+  }
+  
+  if (Serial.available() >= 4) { // Wait until at least 4 bytes (32 bits) are available
+    byte buffer[4];
+    for (int i = 0; i < 4; i++) {
+        buffer[i] = Serial.read();
     }
+    speed = *(int*)buffer; // Convert byte array to long
+    Serial.print("Speed: ");
+    Serial.println(speed); // Print the received integer
+    pumpStepper.setMove(0, speed);
 
-    
+    speedCharacteristic.writeValue(speed);
   }
 
   // do step if required

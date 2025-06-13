@@ -72,8 +72,8 @@ int Stepper::step()
         // Serial.println("step");
         stepMotor();
         this->last_step_time = this->last_step_time + this->step_delay;
-        Serial.print("Step time: ");
-        Serial.println(this->last_step_time);
+        // Serial.print("Step time: ");
+        // Serial.println(this->last_step_time);
         // above would fail to catch up if the motor is behind a more than a step
     }
     return this->last_step_time;

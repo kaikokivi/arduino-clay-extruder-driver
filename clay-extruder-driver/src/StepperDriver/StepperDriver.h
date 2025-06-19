@@ -5,7 +5,7 @@
  The driver is attached to digital pins 8 and 9 and 3.3V of the Arduino.
  
  Created 28 May. 2020
- Modified 29 May. 2020
+ Modified 19 June 2025
  by Kaiko Kivi
 
  */
@@ -14,6 +14,7 @@ class Stepper
 {
 public:
     Stepper(int stepsPerRevolution, int step_pin, int dir_pin);
+    Stepper(int stepsPerRevolution, int step_pin, int dir_pin, bool dir_invert = false);
 
     long speed;
     void setSpeed(long whatSpeed);
@@ -31,6 +32,7 @@ private:
     int dir;
     int step_pin;
     int dir_pin;
+    bool dir_invert; // if true, the motor is reversed
     int step_number;
     int steps_left;
     bool move_continue;

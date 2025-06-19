@@ -10,6 +10,20 @@ Stepper::Stepper(int stepsPerRevolution, int step_pin, int dir_pin)
     this->dir_pin = dir_pin;
     this->step_delay = 0;
     this->speed = 0;
+    this->dir_invert = false; // default direction is not inverted
+    pinMode(this->step_pin, OUTPUT);
+    pinMode(this->dir_pin, OUTPUT);
+}
+Stepper::Stepper(int stepsPerRevolution, int step_pin, int dir_pin, bool dir_invert)
+{
+    this->last_step_time = 0;
+    this->blink_time = 0;
+    this->number_of_steps = stepsPerRevolution;
+    this->step_pin = step_pin;
+    this->dir_pin = dir_pin;
+    this->step_delay = 0;
+    this->speed = 0;
+    this->dir_invert = dir_invert;
     pinMode(this->step_pin, OUTPUT);
     pinMode(this->dir_pin, OUTPUT);
 }
@@ -26,11 +40,11 @@ void Stepper::setSpeed(long whatSpeed)
     // Serial.println(this->step_delay);
     if (whatSpeed > 0)
     {
-        dirMotor(1);
+        dirMotor(dir_invert ? 1 : 0); // if reverse is true, set direction to 0, else to 1
     }
     if (whatSpeed < 0)
     {
-        dirMotor(0);
+        dirMotor(dir_invert ? 0 : 1);
     }
 }
 void Stepper::setMove(int steps_to_move)

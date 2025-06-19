@@ -32,8 +32,8 @@ const int stepsPerRevolution = fullStepRev * stepFrag; // change this to fit the
 
 int speed = 0; // initial speed is 0
 
-// initialize the stepper library on pins 8, 9:
-Stepper pumpStepper(stepsPerRevolution, 8, 9);
+// initialize the stepper library on pins 8, 9
+Stepper pumpStepper(stepsPerRevolution, 8, 9, false);
 
 
 BLEService StepperService(BLE_STEPPER_SERVICE_ID); // BLE LED Service

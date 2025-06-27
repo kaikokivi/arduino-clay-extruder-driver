@@ -1,4 +1,16 @@
-#include <Arduino.h>
+/*
+ Stepper Driver Control Lib
+
+ This program drives a stepper through a driver.
+ The driver is attached to digital pins 8 and 9 and 3.3V of the Arduino.
+
+ Created 28 May. 2020
+ Modified 19 June 2025
+ by Kaiko Kivi
+
+ */
+
+ #include <Arduino.h>
 #include "StepperDriver.h"
 
 Stepper::Stepper(int stepsPerRevolution, int step_pin, int dir_pin)

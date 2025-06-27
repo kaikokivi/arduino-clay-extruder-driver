@@ -8,9 +8,9 @@ Clay extruder control
  The driver is attached to digital pins 8 and 9 and 3.3V of the Arduino.
 
  Stepper is controlled via BLE and Serial connection
- 
+
  Created 28 May. 2020
- Modified 12 Aug. 2023
+ Modified 19 June 2025
  by Kaiko Kivi
 
  */
